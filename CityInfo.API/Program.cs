@@ -10,13 +10,15 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-// builder.Logging.ClearProviders();
-// builder.Logging.AddConsole();
 
 builder.Host.UseSerilog();
 
-// Add services to the container.
+/* Configuration built-in Logger's */
+// builder.Logging.ClearProviders();
+// builder.Logging.AddConsole();
 
+
+/* Add services to the container */
 builder.Services.AddControllers(options =>
 {
     options.ReturnHttpNotAcceptable = true;
@@ -24,22 +26,23 @@ builder.Services.AddControllers(options =>
     .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+builder.Services.AddSingleton<CitiesDataStore>();
 
+
+/* Mail service for concrete build */
 #if DEBUG
 builder.Services.AddTransient<IMailService, LocalMailService>();
 #else
 builder.Services.AddTransient<IMailService, CloudMailService>();
 #endif
 
-builder.Services.AddSingleton<CitiesDataStore>();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+/* Configure the HTTP request pipeline */
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -47,11 +50,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.UseEndpoints(endpoints => endpoints.MapControllers());
 
 app.Run();

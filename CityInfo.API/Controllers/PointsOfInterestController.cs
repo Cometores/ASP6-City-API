@@ -1,7 +1,6 @@
 ﻿using CityInfo.API.Models;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace CityInfo.API.Controllers;
@@ -48,7 +47,7 @@ public class PointsOfInterestController : ControllerBase
         }
     }
 
-    [HttpGet("{pointofinterestid}", Name = "GetPointOfInterest")]
+    [HttpGet("{pointOfInterestId}", Name = "GetPointOfInterest")]
     public ActionResult<PointOfInterestDto> GetPointOfInterest(int cityId, int pointOfInterestId)
     {
         var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
@@ -69,14 +68,15 @@ public class PointsOfInterestController : ControllerBase
         [FromBody] PointsOfInterestForCreationDto pointOfInterest)
     {
         var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
-
         if (city == null)
             return NotFound();
 
         // demo purposes - to be improved
+        // calculate the highest existing id
         var maxPointOfInterestId = _citiesDataStore.Cities.SelectMany(
             c => c.PointOfInterest).Max(p => p.Id);
 
+        // map PointOfInterestForCreationDto to PointOfInterestDto
         var finalPointOfInterest = new PointOfInterestDto()
         {
             Id = ++maxPointOfInterestId,
@@ -90,14 +90,14 @@ public class PointsOfInterestController : ControllerBase
             "GetPointOfInterest",
             new
             {
-                cityId = cityId,
+                cityId,
                 pointOfInterestId = finalPointOfInterest.Id
             },
             finalPointOfInterest
         );
     }
 
-    [HttpPut("{pointOfInterestid}")]
+    [HttpPut("{pointOfInterestId}")]
     public ActionResult UpdatePointOfInterest(
         [FromRoute] int cityId,
         [FromRoute] int pointOfInterestId,
@@ -118,7 +118,7 @@ public class PointsOfInterestController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("{pointofinterestid}")]
+    [HttpPatch("{pointOfInterestId}")]
     public ActionResult PartiallyUpdatePointOfInterest(
         [FromRoute] int cityId,
         [FromRoute] int pointOfInterestId,
@@ -145,6 +145,7 @@ public class PointsOfInterestController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        // check if model is valid after patch
         if (!TryValidateModel(pointOfInterestToPatch))
             return BadRequest(ModelState);
 
@@ -170,9 +171,12 @@ public class PointsOfInterestController : ControllerBase
             return NotFound();
 
         city.PointOfInterest.Remove(pointOfInterestFromStore);
+        
+        // Custom service - Mail logging
         _mailService.Send("Point of interest deleted.",
             $"Point of interest {pointOfInterestFromStore.Name} with id {pointOfInterestFromStore.Id} " +
             $"was deleted");
+        
         return NoContent();
     }
 }
