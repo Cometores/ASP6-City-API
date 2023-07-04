@@ -36,7 +36,7 @@ public class PointsOfInterestController : ControllerBase
                 return NotFound();
             }
 
-            return Ok(city.PointOfInterest);
+            return Ok(city.PointsOfInterest);
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ public class PointsOfInterestController : ControllerBase
             return NotFound();
 
         //find point of interest
-        var pointOfInterest = city.PointOfInterest.FirstOrDefault(c => c.Id == pointOfInterestId);
+        var pointOfInterest = city.PointsOfInterest.FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterest == null)
             return NotFound();
 
@@ -65,7 +65,7 @@ public class PointsOfInterestController : ControllerBase
     [HttpPost]
     public ActionResult<PointOfInterestDto> CreatePointOfInterest(
         [FromRoute] int cityId,
-        [FromBody] PointsOfInterestForCreationDto pointOfInterest)
+        [FromBody] PointOfInterestForCreationDto pointOfInterest)
     {
         var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
         if (city == null)
@@ -74,7 +74,7 @@ public class PointsOfInterestController : ControllerBase
         // demo purposes - to be improved
         // calculate the highest existing id
         var maxPointOfInterestId = _citiesDataStore.Cities.SelectMany(
-            c => c.PointOfInterest).Max(p => p.Id);
+            c => c.PointsOfInterest).Max(p => p.Id);
 
         // map PointOfInterestForCreationDto to PointOfInterestDto
         var finalPointOfInterest = new PointOfInterestDto()
@@ -84,7 +84,7 @@ public class PointsOfInterestController : ControllerBase
             Description = pointOfInterest.Description
         };
 
-        city.PointOfInterest.Add(finalPointOfInterest);
+        city.PointsOfInterest.Add(finalPointOfInterest);
 
         return CreatedAtRoute(
             "GetPointOfInterest",
@@ -107,7 +107,7 @@ public class PointsOfInterestController : ControllerBase
         if (city == null)
             return NotFound();
 
-        var pointOfInterestFromStore = city.PointOfInterest
+        var pointOfInterestFromStore = city.PointsOfInterest
             .FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterestFromStore == null)
             return NotFound();
@@ -129,7 +129,7 @@ public class PointsOfInterestController : ControllerBase
         if (city == null)
             return NotFound();
 
-        var pointOfInterestFromStore = city.PointOfInterest.
+        var pointOfInterestFromStore = city.PointsOfInterest.
             FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterestFromStore == null)
             return NotFound();
@@ -165,12 +165,12 @@ public class PointsOfInterestController : ControllerBase
         if (city == null)
             return NotFound();
 
-        var pointOfInterestFromStore = city.PointOfInterest.
+        var pointOfInterestFromStore = city.PointsOfInterest.
             FirstOrDefault(c => c.Id == pointOfInterestId);
         if (pointOfInterestFromStore == null)
             return NotFound();
 
-        city.PointOfInterest.Remove(pointOfInterestFromStore);
+        city.PointsOfInterest.Remove(pointOfInterestFromStore);
         
         // Custom service - Mail logging
         _mailService.Send("Point of interest deleted.",
