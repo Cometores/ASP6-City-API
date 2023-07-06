@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.JsonPatch;
 namespace CityInfo.API.Controllers;
 
 [Route("api/cities/{cityId}/pointsofinterest")]
-[Authorize]
+[Authorize(Policy = "MustBeFromAntwerp")]
 [ApiController]
 public class PointsOfInterestController : ControllerBase
 {
@@ -31,6 +31,13 @@ public class PointsOfInterestController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PointOfInterestDto>>> GetPointsOfInterest(int cityId)
     {
+        /* User can only get Points of interest from the city he lives in*/
+        var cityName = User.Claims.FirstOrDefault(c => c.Type == "city")?.Value;
+        if (!await _cityInfoRepository.CityNameMatchesCityId(cityName, cityId))
+        {
+            return Forbid();
+        }
+        
         if (!await _cityInfoRepository.CityExistsAsync(cityId))
         {
             _logger.LogInformation(

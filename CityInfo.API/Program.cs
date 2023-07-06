@@ -22,12 +22,8 @@ builder.Host.UseSerilog();
 // builder.Logging.ClearProviders();
 // builder.Logging.AddConsole();
 
-
 /* Add services to the container */
-builder.Services.AddControllers(options =>
-{
-    options.ReturnHttpNotAcceptable = true;
-})
+builder.Services.AddControllers(options => { options.ReturnHttpNotAcceptable = true; })
     .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters();
 
@@ -48,6 +44,13 @@ builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+/* Mail service for concrete build */
+#if DEBUG
+builder.Services.AddTransient<IMailService, LocalMailService>();
+#else
+builder.Services.AddTransient<IMailService, CloudMailService>();
+#endif
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -63,14 +66,18 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-/* Mail service for concrete build */
-#if DEBUG
-builder.Services.AddTransient<IMailService, LocalMailService>();
-#else
-builder.Services.AddTransient<IMailService, CloudMailService>();
-#endif
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MustBeFromAntwerp", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("city", "Antwerp");
+    });
+});
+
 
 var app = builder.Build();
+
 
 /* Configure the HTTP request pipeline */
 if (app.Environment.IsDevelopment())
