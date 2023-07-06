@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.JsonPatch;
 namespace CityInfo.API.Controllers;
 
 [ApiController]
-// [Authorize(Policy = "MustBeFromAntwerp")]
+[Authorize(Policy = "MustBeFromAntwerp")]
 [ApiVersion("2.0")]
 [Route("api/v{version:apiVersion}/cities/{cityId}/pointsofinterest")]
 public class PointsOfInterestController : ControllerBase
