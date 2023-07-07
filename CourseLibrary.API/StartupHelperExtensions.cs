@@ -9,7 +9,10 @@ internal static class StartupHelperExtensions
     // Add services to the container
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(configure =>
+        {
+            configure.ReturnHttpNotAcceptable = true;
+        }).AddXmlDataContractSerializerFormatters();
 
         builder.Services.AddScoped<ICourseLibraryRepository, 
             CourseLibraryRepository>();
@@ -25,12 +28,24 @@ internal static class StartupHelperExtensions
         return builder.Build();
     }
 
-    // Configure the request/response pipelien
+    // Configure the request/response pipeline
     public static WebApplication ConfigurePipeline(this WebApplication app)
     { 
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler(appBuilder =>
+            {
+                appBuilder.Run(async context =>
+                {
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync(
+                        "An unexpected fault happened. Try again later.");
+                });
+            });
         }
  
         app.UseAuthorization();
@@ -42,22 +57,20 @@ internal static class StartupHelperExtensions
 
     public static async Task ResetDatabaseAsync(this WebApplication app)
     {
-        using (var scope = app.Services.CreateScope())
+        using var scope = app.Services.CreateScope();
+        try
         {
-            try
+            var context = scope.ServiceProvider.GetService<CourseLibraryContext>();
+            if (context != null)
             {
-                var context = scope.ServiceProvider.GetService<CourseLibraryContext>();
-                if (context != null)
-                {
-                    await context.Database.EnsureDeletedAsync();
-                    await context.Database.MigrateAsync();
-                }
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.MigrateAsync();
             }
-            catch (Exception ex)
-            {
-                var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-                logger.LogError(ex, "An error occurred while migrating the database.");
-            }
-        } 
+        }
+        catch (Exception ex)
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+            logger.LogError(ex, "An error occurred while migrating the database.");
+        }
     }
 }
