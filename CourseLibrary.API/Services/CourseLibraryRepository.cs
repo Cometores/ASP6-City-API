@@ -134,11 +134,11 @@ public class CourseLibraryRepository : ICourseLibraryRepository
             throw new ArgumentNullException(nameof(authorsResourceParameters));
         }
         
-        if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory) 
-            && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
-        {
-            return await GetAuthorsAsync();
-        }
+        // if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory) 
+        //     && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
+        // {
+        //     return await GetAuthorsAsync();
+        // }
         
         //collection to start from
         var collection = _context.Authors as IQueryable<Author>;
@@ -157,7 +157,10 @@ public class CourseLibraryRepository : ICourseLibraryRepository
             || a.LastName.Contains(searchQuery));
         }
 
-        return await collection.ToListAsync();
+        return await collection
+            .Skip(authorsResourceParameters.PageSize * (authorsResourceParameters.PageNumber - 1))
+            .Take(authorsResourceParameters.PageSize)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds)
