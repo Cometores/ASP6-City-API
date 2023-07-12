@@ -1,6 +1,6 @@
 ## Project data
 logs/
-Migrations/
+CityInfo.API/Migrations/
 
 ## RIDER
 bin/
