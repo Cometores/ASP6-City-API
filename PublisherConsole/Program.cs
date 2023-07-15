@@ -9,7 +9,7 @@ using PublisherDomain;
 //
 PubContext _context = new PubContext();
 //
-// // GetAuthors();
+GetAuthors();
 // // AddAuthor();
 // // GetAuthors();
 // // AddAuthorWithBook();
@@ -55,15 +55,15 @@ PubContext _context = new PubContext();
 //     context.SaveChanges();
 // }
 //
-// void GetAuthors()
-// {
-//     using var context = new PubContext();
-//     var authors = context.Authors.ToList();
-//     foreach (var author in authors)
-//     {
-//         Console.WriteLine(author.FirstName + " " + author.LastName);
-//     }
-// }
+void GetAuthors()
+{
+    using var context = new PubContext();
+    var authors = context.Authors.ToList();
+    // foreach (var author in authors)
+    // {
+    //     Console.WriteLine(author.FirstName + " " + author.LastName);
+    // }
+}
 // //
 // // void QueryFilters()
 // // {
