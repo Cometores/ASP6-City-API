@@ -3,6 +3,7 @@
   <component name="EfCoreDialogsState">
     <option name="keyValueStorage">
       <map>
+        <entry key="Common:42d7edf1-033d-40ba-ae19-5ec13d88f11b:dbContext" value="AirVinyl.API.DbContexts.AirVinylDbContext" />
         <entry key="Common:a6f0bf00-41d1-492b-9925-d5095dd46624:dbContext" value="PublisherData.PubContext" />
         <entry key="Common:buildConfiguration" value="Debug" />
         <entry key="Common:dafd5337-e1a1-408c-b8bd-31a85eea5930:dbContext" value="CityInfo.API.DbContexts.CityInfoContext" />
