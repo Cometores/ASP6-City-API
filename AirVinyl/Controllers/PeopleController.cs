@@ -10,6 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AirVinyl.Entities;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AirVinyl.Controllers
@@ -25,23 +27,32 @@ namespace AirVinyl.Controllers
                 ?? throw new ArgumentNullException(nameof(airVinylDbContext));
         }
 
-        public async Task<IActionResult> Get()
+        /* .NET 5 not supporting [EnableQuery] for async method*/
+        // [EnableQuery]
+        // public async Task<IActionResult> Get()
+        // {
+        //     return Ok(await _airVinylDbContext.People.ToListAsync());
+        // }
+        
+        [EnableQuery]
+        public IActionResult Get()
         {
-            return Ok(await _airVinylDbContext.People.ToListAsync());
+            return Ok(_airVinylDbContext.People);
         }
 
         // People(1)
-        public async Task<IActionResult> Get(int key)
+        [EnableQuery]
+        public IActionResult Get(int key)
         {
-            var person = await _airVinylDbContext.People
-                .FirstOrDefaultAsync(p => p.PersonId == key);
+            var people = _airVinylDbContext.People
+                .Where(p => p.PersonId == key);
 
-            if (person == null)
+            if (!people.Any())
             {
                 return NotFound();
             }
 
-            return Ok(person);
+            return Ok(SingleResult.Create(people));
         }
 
         [HttpGet("odata/People({key})/Email")]
@@ -113,27 +124,41 @@ namespace AirVinyl.Controllers
         }
 
         // odata/People(key)/VinylRecords
+        // [EnableQuery]
+        // [HttpGet("odata/People({key})/VinylRecords")]
+        // public IActionResult GetPersonCollectionProperty(int key)
+        // {
+        //     var collectionPropertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
+        //         .Segments.Last();
+        //
+        //     var person = _airVinylDbContext.People
+        //           .Include(collectionPropertyToGet)
+        //           .FirstOrDefaultAsync(p => p.PersonId == key);
+        //
+        //     if (person == null)
+        //     {
+        //         return NotFound();
+        //     }
+        //
+        //     if (!person.HasProperty(collectionPropertyToGet))
+        //     {
+        //         return NotFound();
+        //     }
+        //
+        //     return Ok(person.GetValue(collectionPropertyToGet));
+        // }
+
+        [EnableQuery]
         [HttpGet("odata/People({key})/VinylRecords")]
-        public async Task<IActionResult> GetPersonCollectionProperty(int key)
+        public IActionResult GetVinylRecordsForPerson(int key)
         {
-            var collectionPropertyToGet = new Uri(HttpContext.Request.GetEncodedUrl())
-                .Segments.Last();
-
-            var person = await _airVinylDbContext.People
-                  .Include(collectionPropertyToGet)
-                  .FirstOrDefaultAsync(p => p.PersonId == key);
-
+            var person = _airVinylDbContext.People.FirstOrDefault(p => p.PersonId == key);
             if (person == null)
             {
                 return NotFound();
             }
 
-            if (!person.HasProperty(collectionPropertyToGet))
-            {
-                return NotFound();
-            }
-
-            return Ok(person.GetValue(collectionPropertyToGet));
+            return Ok(_airVinylDbContext.VinylRecords.Where(v => v.Person.PersonId == key));
         }
 
         [HttpPost("odata/People")]
