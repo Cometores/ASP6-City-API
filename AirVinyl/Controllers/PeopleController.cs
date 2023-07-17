@@ -34,7 +34,7 @@ namespace AirVinyl.Controllers
         //     return Ok(await _airVinylDbContext.People.ToListAsync());
         // }
         
-        [EnableQuery]
+        [EnableQuery(MaxExpansionDepth = 3)]
         public IActionResult Get()
         {
             return Ok(_airVinylDbContext.People);
