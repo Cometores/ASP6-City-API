@@ -27,7 +27,10 @@ namespace AirVinyl
                     new AirVinylEntityDataModel().GetEntityDataModel())
                     .Select()
                     .Expand()
-                    .OrderBy());
+                    .OrderBy()
+                    .SetMaxTop(10)
+                    .Count()
+                    .Filter());
 
             services.AddDbContext<AirVinylDbContext>(options =>
             {
