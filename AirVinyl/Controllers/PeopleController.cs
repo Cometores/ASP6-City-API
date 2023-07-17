@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AirVinyl.Entities;
 
 namespace AirVinyl.Controllers
 {
@@ -131,6 +132,58 @@ namespace AirVinyl.Controllers
             }
 
             return Ok(person.GetValue(collectionPropertyToGet));
+        }
+
+        [HttpPost("odata/People")]
+        public async Task<IActionResult> CreatePerson([FromBody] Person person)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            // add the person to the People collection
+            _airVinylDbContext.People.Add(person);
+            await _airVinylDbContext.SaveChangesAsync();
+            
+            // return the created person
+            return Created(person);
+        }
+
+        [HttpPut("odata/People({key})")]
+        public async Task<IActionResult> UpdatePerson(int key, [FromBody] Person person)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var currentPerson = await _airVinylDbContext.People
+                .FirstOrDefaultAsync(p => p.PersonId == key);
+
+            if (currentPerson == null)
+            {
+                return NotFound();
+            }
+            
+            // Alternative: if the person isn't found: Upsert. This must only be used
+            // if the responsibility for creating the key isn't at server-level. In 
+            // our case, we're using auto-increment fields, so this isn't allowed - 
+            // code is for illustration
+            // if(currentPerson == null)
+            // {
+            //     // the key from the URI is the key we should use
+            //     person.PersonId = key;
+            //     _airVinylDbContext.People.Add(person);
+            //     await _airVinylDbContext.SaveChangesAsync();
+            //     return Created(person);
+            // }
+
+            person.PersonId = currentPerson.PersonId;
+            _airVinylDbContext.Entry(currentPerson).CurrentValues.SetValues(person);
+            await _airVinylDbContext.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
