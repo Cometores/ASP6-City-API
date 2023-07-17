@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AirVinyl.Entities;
+using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AirVinyl.Controllers
 {
@@ -183,6 +185,42 @@ namespace AirVinyl.Controllers
             _airVinylDbContext.Entry(currentPerson).CurrentValues.SetValues(person);
             await _airVinylDbContext.SaveChangesAsync();
 
+            return NoContent();
+        }
+
+        [HttpPatch("odata/People({key})")]
+        public async Task<IActionResult> PartiallyUpdatePerson(int key, [FromBody] Delta<Person> patch)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var currentPerson = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == key);
+
+            if (currentPerson == null)
+            {
+                return NotFound();
+            }
+            
+            patch.Patch(currentPerson);
+            await _airVinylDbContext.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpDelete("odata/People({key})")]
+        public async Task<IActionResult> DeleteOnePerson(int key)
+        {
+            var currentPerson = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == key);
+
+            if (currentPerson == null)
+            {
+                return NotFound();
+            }
+
+            _airVinylDbContext.People.Remove(currentPerson);
+            await _airVinylDbContext.SaveChangesAsync();
             return NoContent();
         }
     }
