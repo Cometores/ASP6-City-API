@@ -24,7 +24,7 @@ namespace AirVinyl.Controllers
         public PeopleController(AirVinylDbContext airVinylDbContext)
         {
             _airVinylDbContext = airVinylDbContext
-                ?? throw new ArgumentNullException(nameof(airVinylDbContext));
+                                 ?? throw new ArgumentNullException(nameof(airVinylDbContext));
         }
 
         /* .NET 5 not supporting [EnableQuery] for async method*/
@@ -33,7 +33,7 @@ namespace AirVinyl.Controllers
         // {
         //     return Ok(await _airVinylDbContext.People.ToListAsync());
         // }
-        
+
         [EnableQuery(MaxExpansionDepth = 3, MaxSkip = 10, MaxTop = 5, PageSize = 4)]
         public IActionResult Get()
         {
@@ -97,7 +97,7 @@ namespace AirVinyl.Controllers
         public async Task<IActionResult> GetPersonPropertyRawValue(int key)
         {
             var person = await _airVinylDbContext.People
-              .FirstOrDefaultAsync(p => p.PersonId == key);
+                .FirstOrDefaultAsync(p => p.PersonId == key);
 
             if (person == null)
             {
@@ -168,11 +168,11 @@ namespace AirVinyl.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             // add the person to the People collection
             _airVinylDbContext.People.Add(person);
             await _airVinylDbContext.SaveChangesAsync();
-            
+
             // return the created person
             return Created(person);
         }
@@ -192,7 +192,7 @@ namespace AirVinyl.Controllers
             {
                 return NotFound();
             }
-            
+
             // Alternative: if the person isn't found: Upsert. This must only be used
             // if the responsibility for creating the key isn't at server-level. In 
             // our case, we're using auto-increment fields, so this isn't allowed - 
@@ -227,7 +227,7 @@ namespace AirVinyl.Controllers
             {
                 return NotFound();
             }
-            
+
             patch.Patch(currentPerson);
             await _airVinylDbContext.SaveChangesAsync();
 
@@ -247,6 +247,27 @@ namespace AirVinyl.Controllers
             _airVinylDbContext.People.Remove(currentPerson);
             await _airVinylDbContext.SaveChangesAsync();
             return NoContent();
+        }
+
+        [HttpGet("odata/People({key})/VinylRecords({vinylRecordKey})")]
+        [EnableQuery]
+        public IActionResult GetVinylReccordForPerson(int key, int vinylRecordKey)
+        {
+            var person = _airVinylDbContext.People.FirstOrDefault(p => p.PersonId == key);
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            var vinylRecord = _airVinylDbContext.VinylRecords.Where(
+                v => v.Person.PersonId == key && v.VinylRecordId == vinylRecordKey);
+
+            if (!vinylRecord.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(SingleResult.Create(vinylRecord));
         }
     }
 }
