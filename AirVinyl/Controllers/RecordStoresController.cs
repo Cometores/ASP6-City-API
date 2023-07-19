@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AirVinyl.API.DbContexts;
 using AirVinyl.Helpers;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.EntityFrameworkCore;
 
 namespace AirVinyl.Controllers
 {
@@ -59,6 +61,17 @@ namespace AirVinyl.Controllers
             
             // return the collection of tags
             return Ok(collectionPropertyValue);
+        }
+
+        // {key} is bugging in this version => use {id}
+        [HttpGet("RecordStores({id})/AirVinyl.Functions.IsHighRated(minimumRating={minimumRating})")]
+        public async Task<bool> IsHighRated(int id, int minimumRating)
+        {
+            // get the RecordStore
+            var recordStore = await _airVinylDbContext.RecordStores.FirstOrDefaultAsync(p => p.RecordStoreId == id
+                && p.Ratings.Any() && (p.Ratings.Sum(r => r.Value) / p.Ratings.Count) >= minimumRating);
+
+            return (recordStore != null);
         }
     }
 }
