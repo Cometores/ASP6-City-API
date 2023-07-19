@@ -21,10 +21,14 @@ namespace AirVinyl.EntityDataModels
             builder.EntitySet<RecordStore>("RecordStores");
 
             var isHighRatedFunction = builder.EntityType<RecordStore>().Function("IsHighRated");
-
             isHighRatedFunction.Returns<bool>();
             isHighRatedFunction.Parameter<int>("minimumRating");
             isHighRatedFunction.Namespace = "AirVinyl.Functions";
+
+            var areRatedByFunction = builder.EntityType<RecordStore>().Collection.Function("AreRatedBy");
+            areRatedByFunction.ReturnsCollectionFromEntitySet<RecordStore>("RecordStores");
+            areRatedByFunction.CollectionParameter<int>("personIds");
+            areRatedByFunction.Namespace = "AirVinyl.Functions";
             
             return builder.GetEdmModel();
         }

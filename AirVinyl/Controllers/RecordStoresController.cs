@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AirVinyl.API.DbContexts;
 using AirVinyl.Helpers;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace AirVinyl.Controllers
 {
@@ -58,7 +61,7 @@ namespace AirVinyl.Controllers
 
             var collectionPropertyToGet = new Uri(HttpContext.Request.GetEncodedUrl()).Segments.Last();
             var collectionPropertyValue = recordStore.GetValue(collectionPropertyToGet);
-            
+
             // return the collection of tags
             return Ok(collectionPropertyValue);
         }
@@ -72,6 +75,15 @@ namespace AirVinyl.Controllers
                 && p.Ratings.Any() && (p.Ratings.Sum(r => r.Value) / p.Ratings.Count) >= minimumRating);
 
             return (recordStore != null);
+        }
+
+        [HttpGet("RecordStores/AirVinyl.Functions.AreRatedBy(personIds={people})")]
+        public async Task<IActionResult> AreRatedBy([FromODataUri] IEnumerable<int> people)
+        {
+            var recordStores = await _airVinylDbContext.RecordStores
+                .Where(p => p.Ratings.Any(r => people.Contains(r.RatedBy.PersonId))).ToListAsync();
+
+            return Ok(recordStores);
         }
     }
 }
