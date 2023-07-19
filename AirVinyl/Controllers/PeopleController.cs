@@ -269,5 +269,90 @@ namespace AirVinyl.Controllers
 
             return Ok(SingleResult.Create(vinylRecord));
         }
+
+        [HttpPost("odata/People({key})/VinylRecords")]
+        public async Task<IActionResult> CreateVinylRecordForPerson(int key, [FromBody] VinylRecord vinylRecord)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            // does the person exist?
+            var person = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == key);
+            if (person == null)
+            {
+                return NotFound();
+            }
+            
+            // link the person to the VinylRecord (also avoids an invalid person 
+            // key on the passed-in record - key from the URi wins)
+            vinylRecord.Person = person;
+            
+            // add the VinylRecord
+            _airVinylDbContext.VinylRecords.Add(vinylRecord);
+            await _airVinylDbContext.SaveChangesAsync();
+            
+            // return the created VinylRecord
+            return Created(vinylRecord);
+        }
+
+        [HttpPatch("odata/People({key})/VinylRecords({vinylRecordKey})")]
+        public async Task<IActionResult> PartiallyUpdateVinylRecordForPerson(int key, int vinylRecordKey,
+            [FromBody] Delta<VinylRecord> patch)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            // does the person exist?
+            var person = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == key);
+            if (person == null)
+            {
+                return NotFound();
+            }
+            
+            // find a matching vinyl record
+            var currentVinylRecord = await _airVinylDbContext.VinylRecords.FirstOrDefaultAsync(
+                p => p.VinylRecordId == vinylRecordKey && p.Person.PersonId == key);
+            
+            // return NotFound if the VinylRecord isn't found
+            if (currentVinylRecord == null)
+            {
+                return NotFound();
+            }
+            
+            // apply patch
+            patch.Patch(currentVinylRecord);
+            await _airVinylDbContext.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpDelete("odata/People({key})/VinylRecords({vinylRecordKey})")]
+        public async Task<IActionResult> DeleteVinylRecordForPerson(int key, int vinylRecordKey)
+        {
+            var currentPerson = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == key);
+            if (currentPerson == null)
+            {
+                return NotFound();
+            }
+            
+            // find a matching vinyl record
+            var currentVinylRecord = await _airVinylDbContext.VinylRecords.FirstOrDefaultAsync(
+                p => p.VinylRecordId == vinylRecordKey && p.Person.PersonId == key);
+
+            if (currentVinylRecord == null)
+            {
+                return NotFound();
+            }
+
+            _airVinylDbContext.VinylRecords.Remove(currentVinylRecord);
+            await _airVinylDbContext.SaveChangesAsync();
+            
+            // return No Content
+            return NoContent();
+        }
     }
 }
