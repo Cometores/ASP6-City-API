@@ -85,5 +85,14 @@ namespace AirVinyl.Controllers
 
             return Ok(recordStores);
         }
+
+        [HttpGet("GetHighRatedRecordStores(minimumRating={minimumRating})")]
+        public async Task<IActionResult> GetHighRatedRecordStores(int minimumRating)
+        {
+            var recordStores = await _airVinylDbContext.RecordStores
+                .Where(p => p.Ratings.Any() && (p.Ratings.Sum(r => r.Value) / p.Ratings.Count) >= minimumRating)
+                .ToListAsync();
+            return Ok(recordStores);
+        }
     }
 }
