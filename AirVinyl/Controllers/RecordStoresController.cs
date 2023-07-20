@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AirVinyl.API.DbContexts;
 using AirVinyl.Entities;
 using AirVinyl.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -154,6 +155,7 @@ namespace AirVinyl.Controllers
             }
         }
 
+        /* Not working yet */
         [HttpPost("RecordStores/AirVinyl.Actions.RemoveRatings")]
         public async Task<IActionResult> RemoveRatings(ODataActionParameters parameters)
         {
@@ -185,7 +187,7 @@ namespace AirVinyl.Controllers
                     store.Ratings.Remove(ratingsByCurrentPerson[i]);
                 }
             }
-            
+
             // save changes
             if (await _airVinylDbContext.SaveChangesAsync() > 0)
             {
@@ -199,6 +201,50 @@ namespace AirVinyl.Controllers
                 // The request is still successful
                 // false is a valid response
                 return Ok(false);
+            }
+        }
+
+        /* Unbound Action */
+        [HttpPost("RemoveRecordStoreRatings")]
+        public async Task<IActionResult> RemoveRecordStoreRatings(ODataActionParameters parameters)
+        {
+            // from the param dictionary, get the personid
+            if (!parameters.TryGetValue("personId", out object outputFromDictionary))
+            {
+                return BadRequest();
+            }
+
+            if (!int.TryParse(outputFromDictionary.ToString(), out int personId))
+            {
+                return BadRequest();
+            }
+
+            // get the RecordStores that were rated by the person with personId
+            var recordStoresRatedByCurrentPerson = await _airVinylDbContext.RecordStores.Include("Ratings")
+                .Include("Ratings.RatedBy").Where(p => p.Ratings.Any(r => r.RatedBy.PersonId == personId))
+                .ToListAsync();
+
+            // remove those ratings
+            foreach (var store in recordStoresRatedByCurrentPerson)
+            {
+                // get the ratings by the current person
+                var ratingsByCurrentPerson = store.Ratings.Where(r => r.RatedBy.PersonId == personId).ToList();
+
+                for (int i = 0; i < ratingsByCurrentPerson.Count(); i++)
+                {
+                    store.Ratings.Remove(ratingsByCurrentPerson[i]);
+                }
+            }
+            
+            // save changes
+            if (await _airVinylDbContext.SaveChangesAsync() > 0)
+            {
+                return NoContent();
+            }
+            else
+            {
+                // something went wrong
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
     }
