@@ -34,6 +34,12 @@ namespace AirVinyl.EntityDataModels
             getHighRatedRecordStoresFunction.Parameter<int>("minimumRating");
             getHighRatedRecordStoresFunction.ReturnsCollectionFromEntitySet<RecordStore>("RecordStores");
             getHighRatedRecordStoresFunction.Namespace = "AirVinylFunctions";
+
+            var rateAction = builder.EntityType<RecordStore>().Action("Rate");
+            rateAction.Returns<bool>();
+            rateAction.Parameter<int>("rating");
+            rateAction.Parameter<int>("personId");
+            rateAction.Namespace = "AirVinyl.Actions";
             
             return builder.GetEdmModel();
         }

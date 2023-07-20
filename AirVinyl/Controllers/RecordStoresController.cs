@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AirVinyl.API.DbContexts;
+using AirVinyl.Entities;
 using AirVinyl.Helpers;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +94,64 @@ namespace AirVinyl.Controllers
                 .Where(p => p.Ratings.Any() && (p.Ratings.Sum(r => r.Value) / p.Ratings.Count) >= minimumRating)
                 .ToListAsync();
             return Ok(recordStores);
+        }
+
+        [HttpPost("RecordStores({id})/AirVinyl.Actions.Rate")]
+        public async Task<IActionResult> Rate(int id, ODataActionParameters parameters)
+        {
+            // get the RecordStore
+            var recordStore = await _airVinylDbContext.RecordStores.FirstOrDefaultAsync(p => p.RecordStoreId == id);
+
+            if (recordStore == null)
+            {
+                return NotFound();  
+            }
+
+            if (!parameters.TryGetValue("rating", out object outputFromDictionary))
+            {
+                return NotFound();
+            }
+
+            if (!int.TryParse(outputFromDictionary.ToString(), out int rating))
+            {
+                return NotFound();
+            }
+
+            if (!parameters.TryGetValue("personId", out outputFromDictionary))
+            {
+                return NotFound();
+            }
+
+            if (!int.TryParse(outputFromDictionary.ToString(), out int personId))
+            {
+                return NotFound();
+            }
+            
+            // the person must exist
+            var person = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == personId);
+
+            if (person == null)
+            {
+                return NotFound();
+            }
+            
+            // everything checks out, add he rating
+            recordStore.Ratings.Add(new Rating() { RatedBy = person, Value = rating});
+            
+            // save changes
+            if (await _airVinylDbContext.SaveChangesAsync() > 0)
+            {
+                // return true
+                return Ok(true);
+            }
+            else
+            {
+                // Something went wrong - we expect our
+                // action to return false in that case.
+                // The request s still successful
+                // false is a valid response
+                return Ok(false);
+            }
         }
     }
 }
