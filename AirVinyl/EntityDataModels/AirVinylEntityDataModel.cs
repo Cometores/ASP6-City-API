@@ -40,7 +40,12 @@ namespace AirVinyl.EntityDataModels
             rateAction.Parameter<int>("rating");
             rateAction.Parameter<int>("personId");
             rateAction.Namespace = "AirVinyl.Actions";
-            
+
+            var removeRatingsAction = builder.EntityType<RecordStore>().Collection.Action("RemoveRatings");
+            removeRatingsAction.Returns<bool>();
+            removeRatingsAction.Parameter<int>("personId");
+            removeRatingsAction.Namespace = "AirVinyl.Actions";
+
             return builder.GetEdmModel();
         }
     }

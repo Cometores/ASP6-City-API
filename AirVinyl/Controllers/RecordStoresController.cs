@@ -104,7 +104,7 @@ namespace AirVinyl.Controllers
 
             if (recordStore == null)
             {
-                return NotFound();  
+                return NotFound();
             }
 
             if (!parameters.TryGetValue("rating", out object outputFromDictionary))
@@ -126,7 +126,7 @@ namespace AirVinyl.Controllers
             {
                 return NotFound();
             }
-            
+
             // the person must exist
             var person = await _airVinylDbContext.People.FirstOrDefaultAsync(p => p.PersonId == personId);
 
@@ -134,10 +134,10 @@ namespace AirVinyl.Controllers
             {
                 return NotFound();
             }
-            
+
             // everything checks out, add he rating
-            recordStore.Ratings.Add(new Rating() { RatedBy = person, Value = rating});
-            
+            recordStore.Ratings.Add(new Rating() { RatedBy = person, Value = rating });
+
             // save changes
             if (await _airVinylDbContext.SaveChangesAsync() > 0)
             {
@@ -149,6 +149,54 @@ namespace AirVinyl.Controllers
                 // Something went wrong - we expect our
                 // action to return false in that case.
                 // The request s still successful
+                // false is a valid response
+                return Ok(false);
+            }
+        }
+
+        [HttpPost("RecordStores/AirVinyl.Actions.RemoveRatings")]
+        public async Task<IActionResult> RemoveRatings(ODataActionParameters parameters)
+        {
+            // from the param dictionary, get the personId
+            if (!parameters.TryGetValue("personId", out object outputFromDictionary))
+            {
+                return BadRequest();
+            }
+
+            if (!int.TryParse(outputFromDictionary.ToString(), out int personId))
+            {
+                return BadRequest();
+            }
+
+            // get the RecordStores that were rated by the person with personId
+            var recordStoresRatedByCurrentPerson =
+                await _airVinylDbContext.RecordStores.Include("Ratings").Include("Ratings.RatedBy")
+                    .Where(p => p.Ratings.Any(r => r.RatedBy.PersonId == personId)).ToListAsync();
+
+            // remove those ratings
+            foreach (var store in recordStoresRatedByCurrentPerson)
+            {
+                // get the ratings by the current person 
+                var ratingsByCurrentPerson = store.Ratings
+                    .Where(r => r.RatedBy.PersonId == personId).ToList();
+
+                for (int i = 0; i < ratingsByCurrentPerson.Count(); i++)
+                {
+                    store.Ratings.Remove(ratingsByCurrentPerson[i]);
+                }
+            }
+            
+            // save changes
+            if (await _airVinylDbContext.SaveChangesAsync() > 0)
+            {
+                // return true
+                return Ok(true);
+            }
+            else
+            {
+                // Something went wrong - we expect our
+                // action to return false in that case.
+                // The request is still successful
                 // false is a valid response
                 return Ok(false);
             }
