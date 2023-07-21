@@ -23,6 +23,17 @@ namespace AirVinyl.API.DbContexts
          
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<DynamicProperty>().HasKey(d => new { d.Key, d.VinylRecord });
+            
+            // dynamic property
+            modelBuilder.Entity<DynamicProperty>().HasData(
+                new DynamicProperty()
+                {
+                    VinylRecordId = 1,
+                    Key = "Publisher",
+                    Value = "Geffen"
+                });
+            
             modelBuilder.Entity<PressingDetail>().HasData(
                 new PressingDetail()
                 {
