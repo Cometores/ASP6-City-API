@@ -1,3 +1,4 @@
+using System.Reflection;
 using Library.API.Contexts;
 using Library.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -8,17 +9,15 @@ using Newtonsoft.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers(configure =>
-{
-    configure.ReturnHttpNotAcceptable = true;
-}).AddNewtonsoftJson(setupAction =>
-{
-    setupAction.SerializerSettings.ContractResolver =
-       new CamelCasePropertyNamesContractResolver();
-});
+builder.Services.AddControllers(configure => { configure.ReturnHttpNotAcceptable = true; }).AddNewtonsoftJson(
+    setupAction =>
+    {
+        setupAction.SerializerSettings.ContractResolver =
+            new CamelCasePropertyNamesContractResolver();
+    });
 
 // configure the NewtonsoftJsonOutputFormatter
-builder.Services.Configure<MvcOptions>(configureOptions => 
+builder.Services.Configure<MvcOptions>(configureOptions =>
 {
     var jsonOutputFormatter = configureOptions.OutputFormatters
         .OfType<NewtonsoftJsonOutputFormatter>().FirstOrDefault();
@@ -32,7 +31,7 @@ builder.Services.Configure<MvcOptions>(configureOptions =>
             jsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
         }
     }
-}); 
+});
 
 builder.Services.AddDbContext<LibraryContext>(
     dbContextOptions => dbContextOptions.UseSqlite(
@@ -48,8 +47,26 @@ builder.Services.AddSwaggerGen(setupAction =>
     setupAction.SwaggerDoc("LibraryOpenAPISpecification", new()
     {
         Title = "Library API",
-        Version = "1"
+        Version = "1",
+        Description = "Through this API you can access author and their books.",
+        Contact = new()
+        {
+            Email = "example@example.com",
+            Name = "Max Mustermann",
+            Url = new Uri("https://google.com")
+        },
+        License = new()
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        }
     });
+
+    var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
+
+    setupAction.IncludeXmlComments(xmlCommentsFullPath);
+    ;
 });
 
 var app = builder.Build();
