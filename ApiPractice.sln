@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherData", "PublisherD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirVinyl", "AirVinyl\AirVinyl.csproj", "{5A32C172-FA4A-432C-A20C-A1E6D91696BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library.API", "Library.API\Library.API.csproj", "{D0D6143D-0B1C-4347-B9FC-B2B6324E0235}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{5A32C172-FA4A-432C-A20C-A1E6D91696BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A32C172-FA4A-432C-A20C-A1E6D91696BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A32C172-FA4A-432C-A20C-A1E6D91696BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0D6143D-0B1C-4347-B9FC-B2B6324E0235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0D6143D-0B1C-4347-B9FC-B2B6324E0235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0D6143D-0B1C-4347-B9FC-B2B6324E0235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0D6143D-0B1C-4347-B9FC-B2B6324E0235}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{30912C64-E19B-4744-8BD4-49D5A708BEB9} = {EC53FC9D-C2E4-4987-9B0D-0C16941A9264}
