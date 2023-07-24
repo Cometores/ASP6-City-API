@@ -43,9 +43,26 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddSwaggerGen(setupAction =>
+{
+    setupAction.SwaggerDoc("LibraryOpenAPISpecification", new()
+    {
+        Title = "Library API",
+        Version = "1"
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+app.UseSwagger();
+
+app.UseSwaggerUI(setupAction =>
+{
+    setupAction.SwaggerEndpoint("/swagger/LibraryOpenAPISpecification/swagger.json", "Library API");
+    setupAction.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 
