@@ -3,6 +3,7 @@ using Library.API.Models;
 using Library.API.Services; 
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace Library.API.Controllers
 {
@@ -49,6 +50,9 @@ namespace Library.API.Controllers
         }
 
         [HttpPut("{authorId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<Author>> UpdateAuthor(
             Guid authorId,
             AuthorForUpdate authorForUpdate)

@@ -2,6 +2,7 @@
 using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace Library.API.Controllers
 {
@@ -27,6 +28,9 @@ namespace Library.API.Controllers
         }
 
         [HttpGet()]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks(
             Guid authorId)
         {
@@ -39,6 +43,15 @@ namespace Library.API.Controllers
             return Ok(_mapper.Map<IEnumerable<Book>>(booksFromRepo));
         }
 
+        /// <summary>
+        /// Get a book by id for a specific author
+        /// </summary>
+        /// <param name="authorId">The id of the book author</param>
+        /// <param name="bookId">The id of the book</param>
+        /// <returns>An ActionResult of type Book</returns>
+        /// <response code="200">Returns the requested Book</response>
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet("{bookId}")]
         public async Task<ActionResult<Book>> GetBook(
             Guid authorId,
