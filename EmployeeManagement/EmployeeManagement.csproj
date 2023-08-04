@@ -17,4 +17,12 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="EmployeeManagement.Test\bin\Debug\net6.0\EmployeeManagement.Test.deps.json" />
+	  <_ContentIncludedByDefault Remove="EmployeeManagement.Test\bin\Debug\net6.0\EmployeeManagement.Test.runtimeconfig.json" />
+	  <_ContentIncludedByDefault Remove="EmployeeManagement.Test\obj\EmployeeManagement.Test.csproj.nuget.dgspec.json" />
+	  <_ContentIncludedByDefault Remove="EmployeeManagement.Test\obj\project.assets.json" />
+	  <_ContentIncludedByDefault Remove="EmployeeManagement.Test\obj\project.packagespec.json" />
+	</ItemGroup>
+
 </Project>
