@@ -20,3 +20,8 @@ course from pluralsight.
 - Dummy mail service - custom created
   - different implementations for development and production
   - mail addresses stored in configuration file
+
+## EmployeeManagement
+Testing API with xUnit.
+
+SQLite as Database.
