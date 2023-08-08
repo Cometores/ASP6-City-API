@@ -7,8 +7,9 @@ using EmployeeManagement.Test.Services;
 
 namespace EmployeeManagement.Test;
 
-/* Implements Class Fixture "sharing context" feature */
-public class EmployeeServiceTests : IClassFixture<EmployeeServiceFixture>
+/* Implements Collection Fixture "sharing context" feature together with DataDrivenEmployeeServiceTests */
+[Collection("EmployeeServiceCollection")]
+public class EmployeeServiceTests //: IClassFixture<EmployeeServiceFixture>
 {
     private readonly EmployeeServiceFixture _employeeServiceFixture;
 
