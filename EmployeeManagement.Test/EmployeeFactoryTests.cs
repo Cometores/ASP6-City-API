@@ -18,7 +18,8 @@ public class EmployeeFactoryTests : IDisposable
         // clean up the setup code, if required
     }
     
-    [Fact]
+    [Fact(Skip = "Skipping for exploring functionality")]
+    [Trait("Category", "EmployeeFactory_CreateEmployee_Salary")]
     public void CreateEmployee_ConstructInternalEmployee_SalaryMustBe2500()
     {
         var employee = (InternalEmployee) _employeeFactory.CreateEmployee("Andrey", "Cometores");
@@ -27,6 +28,7 @@ public class EmployeeFactoryTests : IDisposable
     }
     
     [Fact]
+    [Trait("Category", "EmployeeFactory_CreateEmployee_Salary")]
     public void CreateEmployee_ConstructInternalEmployee_SalaryMustBeBetween2500and3500()
     {
         var employee = (InternalEmployee) _employeeFactory.CreateEmployee("Andrey", "Cometores");
@@ -36,6 +38,7 @@ public class EmployeeFactoryTests : IDisposable
     }
     
     [Fact]
+    [Trait("Category", "EmployeeFactory_CreateEmployee_Salary")]
     public void CreateEmployee_ConstructInternalEmployee_SalaryMustBeBetween2500and3500_Alternative()
     {
         var employee = (InternalEmployee) _employeeFactory.CreateEmployee("Andrey", "Cometores");
@@ -45,6 +48,7 @@ public class EmployeeFactoryTests : IDisposable
     }
     
     [Fact]
+    [Trait("Category", "EmployeeFactory_CreateEmployee_Salary")]
     public void CreateEmployee_ConstructInternalEmployee_SalaryMustBeBetween2500and3500_AlternativeWithInRange()
     {
         var employee = (InternalEmployee) _employeeFactory.CreateEmployee("Andrey", "Cometores");
@@ -53,6 +57,8 @@ public class EmployeeFactoryTests : IDisposable
     }
     
     [Fact]
+    [Trait("Category", "EmployeeFactory_CreateEmployee_Salary")]
+
     public void CreateEmployee_ConstructInternalEmployee_SalaryMustBe2500_PrecisionExample()
     {
         var employee = (InternalEmployee) _employeeFactory.CreateEmployee("Andrey", "Cometores");
@@ -62,6 +68,7 @@ public class EmployeeFactoryTests : IDisposable
     }
 
     [Fact]
+    [Trait("Category", "EmployeeFactory_CreateEmployee_ReturnType")]
     public void CreateEmployee_IsExternalIsTrue_ReturnTypeMustBeExternalEmployee()
     {
         // Act

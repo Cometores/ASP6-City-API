@@ -4,6 +4,7 @@ using EmployeeManagement.Business.Exceptions;
 using EmployeeManagement.DataAccess.Entities;
 using EmployeeManagement.Test.Fixtures;
 using EmployeeManagement.Test.Services;
+using Xunit.Abstractions;
 
 namespace EmployeeManagement.Test;
 
@@ -12,10 +13,12 @@ namespace EmployeeManagement.Test;
 public class EmployeeServiceTests //: IClassFixture<EmployeeServiceFixture>
 {
     private readonly EmployeeServiceFixture _employeeServiceFixture;
+    private readonly ITestOutputHelper _testOutputHelper;
 
-    public EmployeeServiceTests(EmployeeServiceFixture employeeServiceFixture)
+    public EmployeeServiceTests(EmployeeServiceFixture employeeServiceFixture, ITestOutputHelper testOutputHelper)
     {
         _employeeServiceFixture = employeeServiceFixture;
+        _testOutputHelper = testOutputHelper;
     }
 
     [Fact]
@@ -28,6 +31,11 @@ public class EmployeeServiceTests //: IClassFixture<EmployeeServiceFixture>
 
         // Act
         var internalEmployee = _employeeServiceFixture.EmployeeService.CreateInternalEmployee("Brooklyn", "Cannon");
+
+        // Using ITestOutputHelper to Output Additional Information
+        _testOutputHelper.WriteLine($"Employee after Act: " +
+                                    $"{internalEmployee.FirstName} {internalEmployee.LastName}");
+        internalEmployee.AttendedCourses.ForEach(c => _testOutputHelper.WriteLine($"Attended course: {c.Id} {c.Title}"));
 
         // Assert
         Assert.Contains(obligatoryCourse, internalEmployee.AttendedCourses);
@@ -94,7 +102,8 @@ public class EmployeeServiceTests //: IClassFixture<EmployeeServiceFixture>
             Guid.Parse("1fd115cf-f44c-4982-86bc-a8fe2e4ff83e"));
 
         // Act
-        var internalEmployee = await _employeeServiceFixture.EmployeeService.CreateInternalEmployeeAsync("Brooklyn", "Cannon");
+        var internalEmployee =
+            await _employeeServiceFixture.EmployeeService.CreateInternalEmployeeAsync("Brooklyn", "Cannon");
 
         // Assert
         Assert.Equal(obligatoryCourses, internalEmployee.AttendedCourses);
