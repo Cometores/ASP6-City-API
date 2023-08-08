@@ -1,4 +1,5 @@
 ﻿using EmployeeManagement.Business;
+using EmployeeManagement.Business.EventArguments;
 using EmployeeManagement.Business.Exceptions;
 using EmployeeManagement.DataAccess.Entities;
 using EmployeeManagement.Test.Services;
@@ -117,9 +118,24 @@ public class EmployeeServiceTests
         // Creating employee not with Factory or Service - to separate logic we are not testing (logic for creation)
         var internalEmployee = new InternalEmployee("Brooklyn", "Cannon", 5, 3000, false, 1);
 
-        // Act && Assert
+        // Act & Assert
         await Assert.ThrowsAsync<EmployeeInvalidRaiseException>(
             async () =>
                 await employeeService.GiveRaiseAsync(internalEmployee, 50));
+    }
+
+    /* Testing events */
+    [Fact]
+    public void NotifyOfAbsence_EmployeeIsAbsent_OnEmployeeIsAbsentMustBeTriggered()
+    {
+        // Arrange
+        var employeeService = new EmployeeService(new EmployeeManagementTestDataRepository(), new EmployeeFactory());
+        var internalEmployee = new InternalEmployee("Brooklyn", "Cannon", 5, 3000, false, 1);
+
+        // Act & Assert
+        Assert.Raises<EmployeeIsAbsentEventArgs>(
+            handler => employeeService.EmployeeIsAbsent += handler,
+            handler => employeeService.EmployeeIsAbsent -= handler,
+            () => employeeService.NotifyOfAbsence(internalEmployee));
     }
 }
