@@ -1,6 +1,7 @@
 ﻿using EmployeeManagement.Business.Exceptions;
 using EmployeeManagement.DataAccess.Entities;
 using EmployeeManagement.Test.Fixtures;
+using EmployeeManagement.Test.TestData;
 
 namespace EmployeeManagement.Test;
 
@@ -79,8 +80,24 @@ public class DataDrivenEmployeeServiceTests //: IClassFixture<EmployeeServiceFix
         return testData.Take(testDataInstancesToProvide);
     }
 
+    /* Strongly typed Property as member data for the test */
+    public static TheoryData<int, bool> StronglyTypedExampleTestDataForGiveRaise_WithProperty
+    {
+        get
+        {
+            return new TheoryData<int, bool>()
+            {
+                { 100, true },
+                { 200, false }
+            };
+        }
+    }
+
     [Theory]
-    [MemberData(nameof(ExampleTestDataForGiveRaise_WithMethod), 1)]
+    // [MemberData(nameof(ExampleTestDataForGiveRaise_WithMethod), 1)]
+    // [ClassData(typeof(EmployeeServiceTestData))]
+    // [ClassData(typeof(StronglyTypedEmployeeServiceTestData))]
+    [MemberData(nameof(StronglyTypedExampleTestDataForGiveRaise_WithProperty))]
     public async Task GiveRaise_Raise_RaiseGiven_EmployeeMinimumRaiseGivenMatchesValue(
         int raiseGiven, bool expectedValueForMinimumRaiseGiven)
     {
