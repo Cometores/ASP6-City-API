@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EmployeeManagement.Business;
 using EmployeeManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagement.Controllers;
@@ -40,5 +41,20 @@ public class DemoInternalEmployeesController : ControllerBase
         return CreatedAtAction("GetInternalEmployee",
             _mapper.Map<InternalEmployeeDto>(internalEmployee),
             new { employeeId = internalEmployee.Id } );
+    }
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult GetProtectedInternalEmployees()
+    {
+        // depending on the role, redirect to another action
+        if (User.IsInRole("Admin"))
+        {
+            // ReSharper disable once Mvc.ControllerNotResolved
+            // ReSharper disable once Mvc.ActionNotResolved
+            return RedirectToAction("GetInternalEmployees", "ProtectedInternalEmployees");
+        }
+
+        return RedirectToAction("GetInternalEmployees", "InternalEmployees");
     }
 }
