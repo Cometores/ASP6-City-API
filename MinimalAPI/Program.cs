@@ -15,22 +15,25 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapGet("/dishes",
+    async (DishesDbContext dishesDbContext) => { return await dishesDbContext.Dishes.ToListAsync(); });
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/dishes/{dishId:guid}",
+    async (DishesDbContext dishesDbContext, Guid dishId) =>
+    {
+        return await dishesDbContext.Dishes.FirstOrDefaultAsync(d => d.Id == dishId);
+    });
+
+app.MapGet("/dishes/{dishName}",
+    async (DishesDbContext dishesDbContext, string dishName) =>
+    {
+        return await dishesDbContext.Dishes.FirstOrDefaultAsync(d => d.Name == dishName);
+    });
+
+app.MapGet("/dishes/{dishId}/ingredients", async (DishesDbContext dishesDbContext, Guid dishId) =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return (await dishesDbContext.Dishes.Include(d => d.Ingredients)
+        .FirstOrDefaultAsync(d => d.Id == dishId))?.Ingredients;
 });
 
 // recreate & migrate the database on each run, for demo purposes
@@ -42,8 +45,3 @@ using (var serviceScope = app.Services.GetService<IServiceScopeFactory>().Create
 }
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
