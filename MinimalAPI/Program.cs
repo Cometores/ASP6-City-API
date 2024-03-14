@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AutoMapper;
 using DishesAPI.DbContexts;
+using DishesAPI.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -46,15 +47,15 @@ app.MapGet("/dishes/{dishId:guid}", async Task<Results<NotFound, Ok<DishDto>>> (
     }
 
     return TypedResults.Ok(mapper.Map<DishDto>(dishEntity));
-});
+}).WithName("GetDish");
 
 app.MapGet("/dishes/{dishName}", async Task<Ok<DishDto>> (
     DishesDbContext dishesDbContext,
     IMapper mapper,
     string dishName) =>
 {
-    return TypedResults.Ok(mapper.Map<DishDto>(await dishesDbContext.Dishes.
-        FirstOrDefaultAsync(d => d.Name == dishName)));
+    return TypedResults.Ok(
+        mapper.Map<DishDto>(await dishesDbContext.Dishes.FirstOrDefaultAsync(d => d.Name == dishName)));
 });
 
 app.MapGet("/dishes/{dishId}/ingredients", async Task<Results<NotFound, Ok<IEnumerable<IngredientDto>>>> (
@@ -72,6 +73,19 @@ app.MapGet("/dishes/{dishId}/ingredients", async Task<Results<NotFound, Ok<IEnum
             .Include(d => d.Ingredients)
             .FirstOrDefaultAsync(d => d.Id == dishId))
         ?.Ingredients));
+});
+
+app.MapPost("/dishes", async Task<CreatedAtRoute<DishDto>> (
+    DishesDbContext dishesDbContext,
+    IMapper mapper,
+    DishForCreationDto dishForCreationDto) =>
+{
+    var dishEntity = mapper.Map<Dish>(dishForCreationDto);
+    dishesDbContext.Add(dishEntity);
+    await dishesDbContext.SaveChangesAsync();
+
+    var dishToReturn = mapper.Map<DishDto>(dishEntity);
+    return TypedResults.CreatedAtRoute(dishToReturn, "GetDish", new { dishId = dishToReturn.Id });
 });
 
 // recreate & migrate the database on each run, for demo purposes
