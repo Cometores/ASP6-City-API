@@ -10,5 +10,6 @@ public class DishProfile : Profile
     {
         CreateMap<Dish, DishDto>();
         CreateMap<DishForCreationDto, Dish>();
+        CreateMap<DishForUpdateDto, Dish>();
     }
 }
