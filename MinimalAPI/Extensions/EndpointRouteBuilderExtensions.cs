@@ -18,7 +18,8 @@ public static class EndpointRouteBuilderExtensions
         dishesEndpoints.MapGet("/{dishName}", DishesHandlers.GetDishByNameAsync);
         dishesEndpoints.MapPost("", DishesHandlers.CreateDishAsync);
         dishWithGuidIdEndpointsAndLockFilters.MapPut("", DishesHandlers.UpdateDishAsync);
-        dishWithGuidIdEndpointsAndLockFilters.MapDelete("", DishesHandlers.DeleteDishAsync);
+        dishWithGuidIdEndpointsAndLockFilters.MapDelete("", DishesHandlers.DeleteDishAsync)
+            .AddEndpointFilter<LogNotFoundResponseFilter>();
     }
 
     public static void RegisterIngredientsEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
