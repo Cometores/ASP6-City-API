@@ -1,4 +1,5 @@
-﻿using MinimalAPI.EndpointHandlers;
+﻿using MinimalAPI.EndpointFilters;
+using MinimalAPI.EndpointHandlers;
 
 namespace MinimalAPI.Extensions;
 
@@ -14,8 +15,10 @@ public static class EndpointRouteBuilderExtensions
             .WithName("GetDish");
         dishesEndpoints.MapGet("/{dishName}", DishesHandlers.GetDishByNameAsync);
         dishesEndpoints.MapPost("", DishesHandlers.CreateDishAsync);
-        dishWithGuidIdEndpoints.MapPut("", DishesHandlers.UpdateDishAsync);
-        dishWithGuidIdEndpoints.MapDelete("", DishesHandlers.DeleteDishAsync);
+        dishWithGuidIdEndpoints.MapPut("", DishesHandlers.UpdateDishAsync)
+            .AddEndpointFilter<RendangDishIsLockedFilter>();
+        dishWithGuidIdEndpoints.MapDelete("", DishesHandlers.DeleteDishAsync)
+            .AddEndpointFilter<RendangDishIsLockedFilter>();
     }
 
     public static void RegisterIngredientsEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
@@ -23,9 +26,6 @@ public static class EndpointRouteBuilderExtensions
         var ingredientsEndpoints = endpointRouteBuilder.MapGroup("/dishes/{dishId:guid}/ingredients");
 
         ingredientsEndpoints.MapGet("", IngredientsHandlers.GetIngredientsAsync);
-        ingredientsEndpoints.MapPost("", () =>
-        {
-            throw new NotImplementedException();
-        });
+        ingredientsEndpoints.MapPost("", () => { throw new NotImplementedException(); });
     }
 }
