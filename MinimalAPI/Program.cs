@@ -13,6 +13,10 @@ builder.Services.AddDbContext<DishesDbContext>(o => o.UseSqlite(
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddProblemDetails();
+builder.Services.AddAuthentication().AddJwtBearer();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder().AddPolicy("RequireAdminFromGermany", policy =>
+    policy.RequireRole("admin").RequireClaim("country", "Germany"));
 
 var app = builder.Build();
 
@@ -22,7 +26,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler();
 }
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.RegisterDishesEndpoints();
 app.RegisterIngredientsEndpoints();
 

@@ -7,10 +7,40 @@ Complex examples of different types of APIs. This includes:
 - [API with Unit Testing](#unit-testing)
 
 
+
+
 ## Minimal API
 Inspired by
 [Kevin's Dockx](https://app.pluralsight.com/library/courses/asp-dot-net-core-7-building-minimal-apis/table-of-contents)
 course from pluralsight.
+
+### Auth
+JWT-Bearer Token is used to perform the authorization. To create such a token, use the CLI command inside the 
+MinimalAPI project folder:
+<br />`dotnet user-jwts create --audience MinimalAPI`
+<br />The command will create a token with the following parameters:
+- audience: **MinimalAPI**
+- valid issuer: **dotnet-user-jwts**
+- name: **your computer name**
+
+*You can see what's inside the generated token on this [website](https://jwt.io/) or via CLI command:*
+<br />`dotnet user-jwts print <TokenID>`
+
+<br />
+
+Use the generated token in the request authorization tab or on the Postman collection itself:
+![SSL](./others/PostmanBearer_MinimalAPI.png)
+
+The token parameters are checked by the API using the Microsoft JwtBearer package configuration settings, which are 
+taken from [appsettings.json "Authentication"](MinimalAPI/appsettings.json).
+
+<br />
+
+#### Authorization policy
+For the `POST /dishes` method you need to have the **admin role** and the claim **country=Germany**:
+<br />`dotnet user-jwts create --audience MinimalAPI --claim country=Germany --role admin`
+
+
 
 
 ## Basic CRUD API
