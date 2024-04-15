@@ -16,7 +16,10 @@ public static class EndpointRouteBuilderExtensions
 
         dishesEndpoints.MapGet("", DishesHandlers.GetDishesAsync);
         dishWithGuidIdEndpoints.MapGet("", DishesHandlers.GetDishByIdAsync)
-            .WithName("GetDish");
+            .WithName("GetDish")
+            .WithOpenApi()
+            .WithSummary("Get a dish by providing an id.")
+            .WithDescription("Dishes are identified by a URI containing a dish identifier. This identifier is a GUID.");
         dishesEndpoints.MapGet("/{dishName}", DishesHandlers.GetDishByNameAsync)
             .AllowAnonymous();
         dishesEndpoints.MapPost("", DishesHandlers.CreateDishAsync)

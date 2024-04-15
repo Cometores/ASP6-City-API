@@ -1,4 +1,3 @@
-using System.Net;
 using DishesAPI.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using MinimalAPI.Extensions;
@@ -18,6 +17,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddAuthorizationBuilder().AddPolicy("RequireAdminFromGermany", policy =>
     policy.RequireRole("admin").RequireClaim("country", "Germany"));
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,6 +28,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler();
 }
 app.UseHttpsRedirection();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.RegisterDishesEndpoints();
