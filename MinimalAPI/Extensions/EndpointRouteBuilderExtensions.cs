@@ -1,5 +1,6 @@
 ﻿using MinimalAPI.EndpointFilters;
 using MinimalAPI.EndpointHandlers;
+using MinimalAPI.Models;
 
 namespace MinimalAPI.Extensions;
 
@@ -21,10 +22,19 @@ public static class EndpointRouteBuilderExtensions
             .WithSummary("Get a dish by providing an id.")
             .WithDescription("Dishes are identified by a URI containing a dish identifier. This identifier is a GUID.");
         dishesEndpoints.MapGet("/{dishName}", DishesHandlers.GetDishByNameAsync)
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithOpenApi(operation =>
+            {
+                operation.Deprecated = true;
+                return operation;
+            });
         dishesEndpoints.MapPost("", DishesHandlers.CreateDishAsync)
             .RequireAuthorization("RequireAdminFromGermany")
-            .AddEndpointFilter<ValidateAnnotationsFilter>();
+            .AddEndpointFilter<ValidateAnnotationsFilter>()
+            .ProducesValidationProblem(400)
+            .Accepts<DishForCreationDto>(
+                "application/json",
+                "application/vnd.marvin.dishforcreation+json");
         dishWithGuidIdEndpointsAndLockFilters.MapPut("", DishesHandlers.UpdateDishAsync);
         dishWithGuidIdEndpointsAndLockFilters.MapDelete("", DishesHandlers.DeleteDishAsync)
             .AddEndpointFilter<LogNotFoundResponseFilter>();
